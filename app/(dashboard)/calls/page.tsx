@@ -25,7 +25,7 @@ const CallStory: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="md:p-6 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-primary">User Call Stories</h2>
       <ul className="space-y-3">
         {calls.map((call) => (

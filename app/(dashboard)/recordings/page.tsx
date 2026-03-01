@@ -29,7 +29,7 @@ const Recordings: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="md:p-6 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-4 text-primary">Your Recordings</h2>
 
       <ul className="space-y-3">
