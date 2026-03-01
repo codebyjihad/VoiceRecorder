@@ -9,7 +9,59 @@ Includes content protection features to prevent users from copying text.
 
 - Live Demo: [nothing]
 
----
+--- file structure
+VoiceNest/
+├─ .next/
+│  └─ dev/
+│     ├─ build/
+│     │  └─ chunks/
+│     ├─ cache/
+│     │  ├─ images/
+│     │  │  ├─ AjxTsenkFkrJ1QbTzFNiaJGjkcGMV6FBE9q970_CL_0/
+│     │  │  ├─ btsw_0zt2ol1cZyIKZMqgkCmHb9vkm3gcujf-ZaL4Yc/
+│     │  │  └─ gFMm1IE_skSIYvDzYPA6FhPAASAj3KL_oaw8apTHoC0/
+│     │  └─ turbopack/
+│     │     └─ 0c06f068/
+│     ├─ logs/
+│     ├─ server/
+│     │  ├─ app/
+│     │  │  ├─ _not-found/
+│     │  │  │  └─ page/
+│     │  │  └─ (dashboard)/
+│     │  │     ├─ calls/
+│     │  │     │  └─ page/
+│     │  │     ├─ page/
+│     │  │     ├─ profile/
+│     │  │     │  └─ page/
+│     │  │     └─ recordings/
+│     │  │        └─ page/
+│     │  └─ chunks/
+│     │     └─ ssr/
+│     ├─ static/
+│     │  ├─ chunks/
+│     │  ├─ development/
+│     │  └─ media/
+│     └─ types/
+├─ app/
+│  ├─ (dashboard)/
+│  │  ├─ calls/
+│  │  ├─ profile/
+│  │  ├─ recordings/
+│  │  └─ users/
+│  └─ auth/
+│     ├─ login/
+│     └─ register/
+├─ components/
+│  ├─ call/
+│  ├─ layout/
+│  ├─ recording/
+│  └─ ui/
+├─ context/
+├─ hooks/
+├─ lib/
+├─ public/
+└─ types/
+
 
 ## Features
 
