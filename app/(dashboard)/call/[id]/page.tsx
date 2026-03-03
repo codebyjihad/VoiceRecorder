@@ -1,154 +1,80 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useReactMediaRecorder } from 'react-media-recorder'
 import Image from 'next/image'
-import userImage from '@/public/userprofile.png'
 
-export default function CallPage() {
+const CallPage = () => {
   const params = useParams()
   const router = useRouter()
+  const id = params.id
 
-  const [incoming, setIncoming] = useState(false) // user B dekhe incoming call
-  const [callStarted, setCallStarted] = useState(false)
-  const [seconds, setSeconds] = useState(0)
-  const [volume, setVolume] = useState(1)
-  const [recorder, setRecorder] = useState<any>(null)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
-
-  const channelRef = useRef<BroadcastChannel | null>(null)
-
-  // 🔔 BroadcastChannel init for sender/receiver simulation
-  useEffect(() => {
-    const channel = new BroadcastChannel('call_channel')
-    channelRef.current = channel
-
-    channel.onmessage = (event) => {
-      const { type, callerId } = event.data
-      if (type === 'incoming-call' && callerId == params.id) setIncoming(true)
-      if (type === 'call-accepted') setCallStarted(true)
-      if (type === 'call-ended') {
-        setCallStarted(false)
-        setIncoming(false)
-        alert('Call ended')
-        router.push('/users')
-      }
-    }
-
-    return () => channel.close()
-  }, [params.id, router])
-
-  // Timer for active call
-  useEffect(() => {
-    let timer: NodeJS.Timeout
-    if (callStarted) timer = setInterval(() => setSeconds((s) => s + 1), 1000)
-    return () => clearInterval(timer)
-  }, [callStarted])
-
-  const formatTime = () => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`
-  }
-
-  // Accept call → start recording
-  const acceptCall = () => {
-    setIncoming(false)
-    const newRecorder = useReactMediaRecorder({
+  const { startRecording, stopRecording } =
+    useReactMediaRecorder({
       audio: true,
-      onStop: (blobUrl) => {
-        const prev = JSON.parse(localStorage.getItem('recordings') || '[]')
-        const newRecording = {
-          id: Date.now(),
-          title: `Call with User ${params.id}`,
-          date: new Date().toLocaleString(),
-          audioUrl: blobUrl,
+      onStop: async (blobUrl, blob) => {
+        // Save to localStorage
+        const reader = new FileReader()
+        reader.onloadend = async () => {
+          const base64data = reader.result as string
+
+          const newRecording = {
+            id: Date.now(),
+            title: `Call-${id}`,
+            date: new Date().toISOString(),
+            audioUrl: base64data,
+          }
+
+          const prev = JSON.parse(
+            localStorage.getItem('recordings') || '[]'
+          )
+          localStorage.setItem(
+            'recordings',
+            JSON.stringify([...prev, newRecording])
+          )
+
+          // Upload to server
+          if (blob) {
+            const formData = new FormData()
+            formData.append('file', blob)
+            await fetch('/api/upload', {
+              method: 'POST',
+              body: formData,
+            })
+          }
         }
-        localStorage.setItem('recordings', JSON.stringify([...prev, newRecording]))
-        router.push('/recordings')
+
+        if (blob) reader.readAsDataURL(blob)
       },
     })
-    setRecorder(newRecorder)
-    newRecorder.startRecording()
-    setCallStarted(true)
 
-    // Notify caller
-    channelRef.current?.postMessage({ type: 'call-accepted', callerId: params.id })
-  }
+  useEffect(() => {
+    // Start recording automatically when page loads
+    startRecording()
+    return () => stopRecording()
+  }, [])
 
-  // Reject incoming call
-  const rejectCall = () => {
-    setIncoming(false)
-    channelRef.current?.postMessage({ type: 'call-ended', callerId: params.id })
-    router.push('/users')
-  }
-
-  // Stop active call
   const handleStop = () => {
-    setCallStarted(false)
-    if (recorder) recorder.stopRecording()
-    channelRef.current?.postMessage({ type: 'call-ended', callerId: params.id })
-  }
-
-  // Volume control
-  const handleVolumeChange = (value: number) => {
-    setVolume(value)
-    if (audioRef.current) audioRef.current.volume = value
+    stopRecording()
+    router.push('/') // 🔹 Stop button click -> redirect home
   }
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-black text-white">
-      <Image src={userImage} alt="user" width={100} height={100} className="rounded-full mb-4" />
-      <h2 className="text-xl font-semibold">User {params.id}</h2>
+    <div className="p-6 text-center bg-secondary container max-w-7xl mx-auto rounded-3xl h-[500px] flex flex-col justify-center items-center">
+      <div className="mb-4">
+        <Image src="/userprofile.png" alt="user" width={100} height={100} className="rounded-full" />
+      </div>
+      <h2 className="text-2xl mb-6">Calling User {id}</h2>
 
-      {/* Waiting for call */}
-      {!callStarted && !incoming && <p className="text-gray-400 mt-4">Calling...</p>}
-
-      {/* Incoming Call */}
-      {incoming && (
-        <div className="mt-4 flex flex-col items-center gap-3">
-          <p className="text-green-400 text-lg">Incoming Call...</p>
-          <div className="flex gap-4">
-            <button onClick={acceptCall} className="bg-green-600 px-4 py-2 rounded">Accept</button>
-            <button onClick={rejectCall} className="bg-red-600 px-4 py-2 rounded">Reject</button>
-          </div>
-        </div>
-      )}
-
-      {/* Active Call */}
-      {callStarted && (
-        <div className="mt-6 flex flex-col items-center gap-4">
-          <p className="text-green-400 text-lg">{formatTime()}</p>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.1"
-            value={volume}
-            onChange={(e) => handleVolumeChange(Number(e.target.value))}
-          />
-          <button onClick={handleStop} className="bg-red-600 w-20 h-20 rounded-full mt-4">Stop</button>
-        </div>
-      )}
-
-   
-      {(incoming || callStarted) && (
-        <button
-          onClick={() => {
-            setIncoming(false)
-            setCallStarted(false)
-            if (recorder) recorder.stopRecording()
-            channelRef.current?.postMessage({ type: 'call-ended', callerId: params.id })
-            router.push('/users')
-          }}
-          className="bg-yellow-600 px-4 py-2 rounded mt-4"
-        >
-          Force Stop Call
-        </button>
-      )}
-
-      <audio ref={audioRef} />
+      <button
+        onClick={handleStop}
+        className="bg-red-500 text-white px-6 py-3 rounded-full hover:bg-red-600 transition"
+      >
+        Stop Call
+      </button>
     </div>
   )
 }
+
+export default CallPage
