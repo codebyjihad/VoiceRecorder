@@ -19,13 +19,13 @@ export default function UsersPage() {
   const router = useRouter()
 
   return (
-    <div className="container max-w-7xl mx-auto p-6">
+    <div className="container max-w-7xl mx-auto md:p-6">
       <h2 className="text-2xl font-bold mb-4">Users</h2>
 
       {users.map((user) => (
         <div
           key={user.id}
-          className="flex justify-between items-center p-4 border rounded-lg mb-3"
+          className="flex justify-between p-4 items-center mp-4 border rounded-lg mb-3"
         >
           <div className="flex items-center gap-3">
             <Image
