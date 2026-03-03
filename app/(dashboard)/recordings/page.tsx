@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Play, Pause, Download, Trash2 } from 'lucide-react'
 
 type Recording = {
@@ -10,40 +10,39 @@ type Recording = {
   audioUrl: string
 }
 
-const initialRecordings: Recording[] = [
-  { id: 1, title: 'Meeting with Alice', date: '2024-06-10', audioUrl: '/recordings/meeting-alice.mp3' },
-  { id: 2, title: 'Support Call', date: '2024-06-12', audioUrl: '/recordings/support-call.mp3' },
-  { id: 3, title: 'Sales Pitch', date: '2024-06-13', audioUrl: '/recordings/sales-pitch.mp3' },
-]
-
-const Recordings: React.FC = () => {
-  const [recordings, setRecordings] = useState(initialRecordings)
+const Recordings = () => {
   const [playingId, setPlayingId] = useState<number | null>(null)
+  const [recordings, setRecordings] = useState<Recording[]>([])
 
-  const handlePlayPause = (id: number) => {
-    setPlayingId(playingId === id ? null : id)
-  }
+  useEffect(() => {
+    const data = localStorage.getItem('recordings')
+    if (data) {
+      setRecordings(JSON.parse(data))
+    }
+  }, [])
 
   const handleDelete = (id: number) => {
-    setRecordings((prev) => prev.filter((rec) => rec.id !== id))
+    const filtered = recordings.filter((rec) => rec.id !== id)
+    setRecordings(filtered)
+    localStorage.setItem('recordings', JSON.stringify(filtered))
   }
 
   return (
     <div className="md:p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-primary">Your Recordings</h2>
+      <h2 className="text-2xl font-bold mb-4">Your Recordings</h2>
 
       <ul className="space-y-3">
         {recordings.map((rec) => (
           <li
             key={rec.id}
-            className="flex justify-between items-center p-4 bg-card border border-border rounded-lg shadow-md"
+            className="flex justify-between items-center p-4 border rounded-lg"
           >
             <div>
-              <p className="font-semibold text-foreground">{rec.title}</p>
-              <p className="text-sm text-foreground/70">{rec.date}</p>
+              <p>{rec.title}</p>
+              <p className="text-sm">{rec.date}</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex gap-3 items-center">
               <audio
                 id={`audio-${rec.id}`}
                 src={rec.audioUrl}
@@ -53,43 +52,33 @@ const Recordings: React.FC = () => {
 
               <button
                 onClick={() => {
-                  const audio = document.getElementById(`audio-${rec.id}`) as HTMLAudioElement
-                  if (audio) {
-                    if (playingId === rec.id) {
-                      audio.pause()
-                    } else {
-                      audio.play()
-                    }
-                  }
-                  handlePlayPause(rec.id)
+                  const audio = document.getElementById(
+                    `audio-${rec.id}`
+                  ) as HTMLAudioElement
+                  if (!audio) return
+                  playingId === rec.id
+                    ? audio.pause()
+                    : audio.play()
                 }}
-                className="p-2 text-primary hover:text-primary/80 transition"
               >
-                {playingId === rec.id ? <Pause size={20} /> : <Play size={20} />}
+                {playingId === rec.id ? (
+                  <Pause size={20} />
+                ) : (
+                  <Play size={20} />
+                )}
               </button>
 
-              <a
-                href={rec.audioUrl}
-                download
-                className="p-2 text-foreground/80 hover:text-primary transition"
-              >
+              <a href={rec.audioUrl} download>
                 <Download size={20} />
               </a>
 
-              <button
-                onClick={() => handleDelete(rec.id)}
-                className="p-2 text-destructive/80 hover:text-destructive transition"
-              >
+              <button onClick={() => handleDelete(rec.id)}>
                 <Trash2 size={20} />
               </button>
             </div>
           </li>
         ))}
       </ul>
-
-      {recordings.length === 0 && (
-        <p className="mt-4 text-foreground/80 text-center">No recordings found</p>
-      )}
     </div>
   )
 }
