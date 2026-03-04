@@ -28,7 +28,7 @@ const Sidebar = () => {
 
         <div>
           <h1 className="text-2xl font-bold text-sidebar-foreground mb-10">
-            VoiceNest
+            VoiceRecorder
           </h1>
 
           <ul className="space-y-3">
