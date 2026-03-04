@@ -1,4 +1,4 @@
-# Project Name
+# Voice Recorder
 
 A professional web application built with **Next.js** for frontend and **Node.js + Express + MongoDB** for backend.  
 Includes content protection features to prevent users from copying text.
