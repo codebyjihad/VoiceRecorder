@@ -3,11 +3,10 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
-  LayoutDashboard,
   Users,
   PhoneCall,
   Mic,
-   User,
+  User,
   LogOut
 } from "lucide-react"
 
@@ -15,7 +14,7 @@ const menuItems = [
   { name: "Users", href: "/", icon: Users },
   { name: "Calls", href: "calls", icon: PhoneCall },
   { name: "Recordings", href: "/recordings", icon: Mic },
-   { name: "Profile", href: "/profile", icon: User }
+  { name: "Profile", href: "/profile", icon: User }
 ]
 
 const Sidebar = () => {
@@ -24,7 +23,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex w-64 h-screen bg-sidebar border-r border-sidebar-border flex-col justify-between p-6">
+      <aside className="hidden md:flex w-64 h-screen bg-sidebar border-r border-sidebar-border flex-col justify-between p-4">
 
         <div>
           <h1 className="text-2xl font-bold text-sidebar-foreground mb-10">
