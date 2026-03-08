@@ -30,6 +30,7 @@ const Sidebar = () => {
             VoiceRecorder
           </h1>
 
+
           <ul className="space-y-3">
             {menuItems.map((item, index) => {
               const isActive = pathname === item.href
