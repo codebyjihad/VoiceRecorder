@@ -20,7 +20,7 @@ const CallPage = () => {
         formData.append('file', blob)
 
         await fetch(
-          'http://localhost:5000/api/recording/upload',
+          'http://localhost:8080/api/recording/upload',
           {
             method: 'POST',
             body: formData,
@@ -34,7 +34,7 @@ const CallPage = () => {
       const callerId = localStorage.getItem('userId')
 
       const res = await fetch(
-        'http://localhost:5000/api/call/start',
+        'http://localhost:8080/api/call/start',
         {
           method: 'POST',
           headers: {
@@ -63,7 +63,7 @@ const CallPage = () => {
 
     const callId = localStorage.getItem('callId')
 
-    await fetch('http://localhost:5000/api/call/end', {
+    await fetch('http://localhost:8080/api/call/end', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

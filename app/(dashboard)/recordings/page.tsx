@@ -17,7 +17,7 @@ const Recordings = () => {
       const userId = localStorage.getItem('userId')
 
       const res = await fetch(
-        `http://localhost:5000/api/call/history/${userId}`
+        `http://localhost:8080/api/call/history/${userId}`
       )
 
       const data = await res.json()

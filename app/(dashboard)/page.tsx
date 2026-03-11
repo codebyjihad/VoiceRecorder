@@ -18,7 +18,7 @@ export default function UsersPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       const res = await fetch(
-        'http://localhost:5000/api/users'
+        'http://localhost:8080/api/users'
       )
 
       const data = await res.json()
