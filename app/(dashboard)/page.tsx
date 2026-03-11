@@ -2,21 +2,32 @@
 
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import userImage from '@/public/userprofile.png'
+import { useEffect, useState } from 'react'
 
 type User = {
-  id: number
+  _id: string
   name: string
-  number: string
+  email: string
 }
-
-const users: User[] = [
-  { id: 1, name: 'Alice Johnson', number: '+8801734567890' },
-  { id: 2, name: 'John Doe', number: '+8801712345678' },
-]
 
 export default function UsersPage() {
   const router = useRouter()
+
+  const [users, setUsers] = useState<User[]>([])
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const res = await fetch(
+        'http://localhost:5000/api/users'
+      )
+
+      const data = await res.json()
+
+      setUsers(data)
+    }
+
+    fetchUsers()
+  }, [])
 
   return (
     <div className="container max-w-7xl mx-auto md:p-6">
@@ -24,25 +35,28 @@ export default function UsersPage() {
 
       {users.map((user) => (
         <div
-          key={user.id}
-          className="flex justify-between p-4 items-center mp-4 border rounded-lg mb-3"
+          key={user._id}
+          className="flex justify-between p-4 items-center border rounded-lg mb-3"
         >
           <div className="flex items-center gap-3">
             <Image
-              src={userImage}
+              src="/userprofile.png"
               alt="user"
               width={50}
               height={50}
               className="rounded-full"
             />
+
             <div>
               <p className="font-semibold">{user.name}</p>
-              <p className="text-sm text-gray-500">{user.number}</p>
+              <p className="text-sm text-gray-500">
+                {user.email}
+              </p>
             </div>
           </div>
 
           <button
-            onClick={() => router.push(`/call/${user.id}`)}
+            onClick={() => router.push(`/call/${user._id}`)}
             className="bg-green-500 text-white px-4 py-2 rounded"
           >
             Call

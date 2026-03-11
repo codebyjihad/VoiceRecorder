@@ -1,57 +1,62 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
-// Define type for a Call
 type Call = {
-  id: number
-  user: string
-  time: string
-  duration: string
+  _id: string
+  callerId: {
+    name: string
+  }
+  receiverId: {
+    name: string
+  }
+  startTime: string
+  duration: number
 }
 
-// Sample call data
-const initialCalls: Call[] = [
-  { id: 1, user: 'John Doe', time: '10:30 AM', duration: '5 min ago' },
-  { id: 2, user: 'Jane Smith', time: '11:15 AM', duration: '8 min ago' },
-  { id: 3, user: 'Alex Brown', time: '1:45 PM', duration: '3 min ago' },
-]
-
 const CallStory: React.FC = () => {
-  const [calls, setCalls] = useState<Call[]>(initialCalls)
+  const [calls, setCalls] = useState<Call[]>([])
 
-  const handleDelete = (id: number) => {
-    const filtered = calls.filter((call) => call.id !== id)
-    setCalls(filtered)
-  }
+  useEffect(() => {
+    const fetchCalls = async () => {
+      const userId = localStorage.getItem('userId')
+
+      const res = await fetch(
+        `http://localhost:5000/api/call/history/${userId}`
+      )
+
+      const data = await res.json()
+
+      setCalls(data)
+    }
+
+    fetchCalls()
+  }, [])
 
   return (
     <div className="md:p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-primary">User Call Stories</h2>
+      <h2 className="text-2xl font-bold mb-4 text-primary">
+        User Call Stories
+      </h2>
+
       <ul className="space-y-3">
         {calls.map((call) => (
           <li
-            key={call.id}
-            className="flex justify-between items-center p-4 bg-card border-border border-1 rounded-lg shadow-md"
+            key={call._id}
+            className="flex justify-between items-center p-4 border rounded-lg"
           >
             <div>
-              <p className="font-semibold text-foreground">{call.user}</p>
-              <p className="text-foreground text-sm">{call.time}</p>
+              <p className="font-semibold">
+                {call.receiverId?.name}
+              </p>
+              <p className="text-sm">
+                {new Date(call.startTime).toLocaleString()}
+              </p>
             </div>
-            <div className="flex items-center gap-4">
-              <p className="text-foreground/80 text-sm">{call.duration}  </p>
-              <button
-                onClick={() => handleDelete(call.id)}
-                className="text-destructive/80 hover:text-foreground font-bold"
-              >
-                Delete
-              </button>
-            </div>
+
+            <p className="text-sm">{call.duration}s</p>
           </li>
         ))}
       </ul>
-      {calls.length === 0 && (
-        <p className="mt-4 text-foreground text-center">No calls available</p>
-      )}
     </div>
   )
 }

@@ -14,62 +14,85 @@ const CallPage = () => {
     useReactMediaRecorder({
       audio: true,
       onStop: async (blobUrl, blob) => {
-        // Save to localStorage
-        const reader = new FileReader()
-        reader.onloadend = async () => {
-          const base64data = reader.result as string
+        if (!blob) return
 
-          const newRecording = {
-            id: Date.now(),
-            title: `Call-${id}`,
-            date: new Date().toISOString(),
-            audioUrl: base64data,
+        const formData = new FormData()
+        formData.append('file', blob)
+
+        await fetch(
+          'http://localhost:5000/api/recording/upload',
+          {
+            method: 'POST',
+            body: formData,
           }
-
-          const prev = JSON.parse(
-            localStorage.getItem('recordings') || '[]'
-          )
-          localStorage.setItem(
-            'recordings',
-            JSON.stringify([...prev, newRecording])
-          )
-
-          // Upload to server
-          if (blob) {
-            const formData = new FormData()
-            formData.append('file', blob)
-            await fetch('/api/upload', {
-              method: 'POST',
-              body: formData,
-            })
-          }
-        }
-
-        if (blob) reader.readAsDataURL(blob)
+        )
       },
     })
 
   useEffect(() => {
-    // Start recording automatically when page loads
+    const startCall = async () => {
+      const callerId = localStorage.getItem('userId')
+
+      const res = await fetch(
+        'http://localhost:5000/api/call/start',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            callerId,
+            receiverId: id,
+          }),
+        }
+      )
+
+      const data = await res.json()
+
+      localStorage.setItem('callId', data._id)
+    }
+
+    startCall()
     startRecording()
+
     return () => stopRecording()
   }, [])
 
-  const handleStop = () => {
+  const handleStop = async () => {
     stopRecording()
-    router.push('/') // 🔹 Stop button click -> redirect home
+
+    const callId = localStorage.getItem('callId')
+
+    await fetch('http://localhost:5000/api/call/end', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        callId,
+      }),
+    })
+
+    router.push('/')
   }
 
   return (
-    <div className="p-6 text-center bg-secondary container max-w-7xl mx-auto rounded-3xl h-[500px] flex flex-col justify-center items-center">
-      <div className="mb-4">
-        <Image src="/userprofile.png" alt="user" width={100} height={100} className="rounded-full" />
-      </div>
-      <h2 className="text-2xl mb-6">Calling User {id}</h2>
+    <div className="p-6 text-center container max-w-7xl mx-auto h-[500px] flex flex-col justify-center items-center">
+      <Image
+        src="/userprofile.png"
+        alt="user"
+        width={100}
+        height={100}
+        className="rounded-full"
+      />
+
+      <h2 className="text-2xl mb-6">
+        Calling User {id}
+      </h2>
 
       <button
         onClick={handleStop}
-        className="bg-red-500 text-white px-6 py-3 rounded-full hover:bg-red-600 transition"
+        className="bg-red-500 text-white px-6 py-3 rounded-full"
       >
         Stop Call
       </button>
