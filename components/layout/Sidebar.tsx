@@ -11,8 +11,7 @@ import {
 } from "lucide-react"
 
 const menuItems = [
-  { name: "Users", href: "/", icon: Users },
-  { name: "Calls", href: "calls", icon: PhoneCall },
+  { name: "Calls", href: "/", icon: PhoneCall },
   { name: "Recordings", href: "/recordings", icon: Mic },
   { name: "Profile", href: "/profile", icon: User }
 ]
